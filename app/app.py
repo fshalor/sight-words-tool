@@ -9,11 +9,19 @@ from bs4 import BeautifulSoup
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or \
-    'e5ac358c-f0bf-11e5-9e39-sdfasdf2324'
+app.config.update(
+    #Set the secret key to a sufficiently random value
+    SECRET_KEY=os.urandom(24),
+    #Set the session cookie to be secure
+    SESSION_COOKIE_SECURE=True,
+    #Set the session cookie for our app to a unique name
+    SESSION_COOKIE_NAME='SightWOrds-WebSession',
+    #Set CSRF tokens to be valid for the duration of the session. This assumes you’re using WTF-CSRF protection
+    WTF_CSRF_TIME_LIMIT=None
+)
 
 def random_word():
-    fname = "/app/app/simple-words.txt"
+    fname = "/srv/app/app/simple-words.txt"
     lines = open(fname).read().splitlines()
     return random.choice(lines)
 
@@ -38,10 +46,11 @@ def index():
     errors = []
     typedword = []
     errors = []
-    if 'word_to_spell' in  session:
+    if session.get('word_to_spell'):
+    #if 'word_to_spell' in  session:
         # If we have a session. Use it. If not, make one and get a word.
         print("Session detected. Using data.", file=sys.stderr)
-        session['word_to_spell'] = word_to_spell
+        word_to_spell = session['word_to_spell']
     else:
         word_to_spell = random_word()
         session['word_to_spell'] = word_to_spell
