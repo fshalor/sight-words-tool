@@ -70,7 +70,7 @@ def index():
         print(len(theword), file=sys.stderr)
         print(word_to_spell, file=sys.stderr)
         print(len(word_to_spell), file=sys.stderr)
-        if str(word_to_spell) == str(theword):
+        if re.match(word_to_spell, theword, re.IGNORECASE):
             print("I am equal", file=sys.stderr)
             incorrect = []
             correct = "True" 
