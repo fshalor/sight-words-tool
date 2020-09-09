@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'sight-words-tool
+
+  Sample SAM Template for sight-words-tool
+
+  '
+Parameters:
+  AutoPublishAliasName:
+    Type: String
+    Default: current
+    Description: The alias used for Auto Publishing
+  StageName:
+    Type: String
+    Default: prod
+    Description: The Lambda Function and API Gateway Stage
+  FunctionName:
+    Type: String
+    Default: Example
+    Description: The Lambda Function Name
+Outputs:
+  ExampleAPIUrl:
+    Value:
+      Fn::Sub: https://${ExampleAPI}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/
+Resources:
+  ExampleFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias:
+        Ref: AutoPublishAliasName
+      FunctionName:
+        Fn::Sub: ${FunctionName}-${StageName}
+      Handler: testapp.app
+      Runtime: python3.6
+      MemorySize: 128
+      Timeout: 60
+      CodeUri: ExampleFunction
+      Environment:
+        Variables:
+          STAGE:
+            Ref: StageName
+          REGION:
+            Ref: AWS::Region
+      Role:
+        Fn::GetAtt:
+        - ExampleFunctionIAMRole
+        - Arn
+      Events:
+        AnyRequest:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+            RestApiId:
+              Ref: ExampleAPI
+        AllRequests:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId:
+              Ref: ExampleAPI
+  ExampleAPILambdaPermission:
+    DependsOn: ExampleFunction
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      SourceArn:
+        Fn::Sub: arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ExampleAPI}/*
+      FunctionName:
+        Fn::Sub:
+        - ${FuncArn}:current
+        - FuncArn:
+            Fn::GetAtt:
+            - ExampleFunction
+            - Arn
+      Principal: apigateway.amazonaws.com
+  ExampleFunctionIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - sts:AssumeRole
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+      Policies:
+      - PolicyName: CW-Logs
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:*
+            Resource: '*'
+  ExampleAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName:
+        Ref: StageName
+      DefinitionBody:
+        swagger: 2.0
+        info:
+          title:
+            Fn::Sub: API-${FunctionName}-${StageName}
+        paths:
+          /:
+            x-amazon-apigateway-any-method:
+              produces:
+              - application/json
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ExampleFunction.Arn}:${AutoPublishAliasName}/invocations
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                type: aws_proxy
+          /{proxy+}:
+            x-amazon-apigateway-any-method:
+              produces:
+              - application/json
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ExampleFunction.Arn}:${AutoPublishAliasName}/invocations
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                type: aws_proxy

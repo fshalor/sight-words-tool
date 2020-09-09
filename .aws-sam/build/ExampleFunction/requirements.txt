@@ -1,0 +1,11 @@
+alembic==0.8.5
+beautifulsoup4==4.4.1
+flask
+Flask-Migrate==1.8.0
+Flask-Script==2.0.5
+Jinja2
+Mako==1.0.4
+MarkupSafe==0.23
+python-editor==0.5
+requests>=2.20.0
+#werkzeug
