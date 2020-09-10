@@ -11,3 +11,4 @@ requests>=2.20.0
 werkzeug
 aws_lambda_wsgi
 aws-wsgi
+pyodbc
