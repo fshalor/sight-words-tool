@@ -1,0 +1,6 @@
+{
+    "dev": {
+        "s3_bucket": "sightwords-packages",
+        "app_function": "app.app"
+    }
+}

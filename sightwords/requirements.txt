@@ -8,6 +8,5 @@ Mako==1.0.4
 MarkupSafe==0.23
 python-editor==0.5
 requests>=2.20.0
-werkzeug
-aws_lambda_wsgi
-aws-wsgi
+werkzeug==0.*
+zappa

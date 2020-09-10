@@ -103,3 +103,6 @@ def index():
     return render_template('index.html', word_to_spell=word_to_spell, errors=errors)
 
 
+# Local use only. Of course. I'll add the port back in, unless I uWSGI it.
+if __name__ == '__main__':
+    app.run()
