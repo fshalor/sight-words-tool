@@ -78,11 +78,12 @@ functions:
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
     events:
-      - http:
-          path: /
-          method: any
-          integration: LAMBDA
-      - http: 'ANY {proxy+}'
+      - httpApi:
+          path: "/"
+          method: "*"
+      - httpApi: 
+          path: "/{proxy+}"
+          method: "*"
 
 
 #      - websocket: $connect
